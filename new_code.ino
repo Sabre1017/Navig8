@@ -53,30 +53,38 @@ void setup(){ // put your setup code here, to run once
   tcaSelect(6);
   if (tcs.begin()) {
         Serial.println("TCS34725 Sensor 1 Initialized on Channel 6");
+        Serial1.println("TCS34725 Sensor 1 Initialized on Channel 6");
     } else {
         Serial.println("No TCS34725 found on Channel 6");
+        Serial1.println("No TCS34725 found on Channel 6");
     }
 
   // Select and initialize Sensor 2 (Channel 1)
   tcaSelect(2);
   if (tcs.begin()) {
         Serial.println("TCS34725 Sensor 2 Initialized on Channel 2");
+        Serial1.println("TCS34725 Sensor 2 Initialized on Channel 2");
   } else {
         Serial.println("No TCS34725 found on Channel 2");
+        Serial1.println("No TCS34725 found on Channel 2");
   }
 
   tcaSelect(4);
   if (vl6180x.begin()) {
         Serial.println("VL6180X Sensor 1 Initialized on Channel 4");
+        Serial1.println("VL6180X Sensor 1 Initialized on Channel 4");
   } else {
         Serial.println("No VL6180X found on Channel 4");
+        Serial1.println("No VL6180X found on Channel 4");
   }
 
     tcaSelect(3);
   if (vl6180x.begin()) {
         Serial.println("VL6180X Sensor 2 Initialized on Channel 3");
+        Serial1.println("VL6180X Sensor 2 Initialized on Channel 3");
   } else {
         Serial.println("No VL6180X found on Channel 3");
+        Serial1.println("No VL6180X found on Channel 3");
   }
   
   delay(100);
@@ -133,26 +141,30 @@ if (Serial1.available()) {
             Stop();
         }
   else if (receivedChar == 'b') {
+            systemActive = true;
             colour_sort = true;
             colour = "Blue";
             Serial1.println("Only collecting blue items.");
   }
   else if (receivedChar == 'r') {
-            colour_sort = true;
+            systemActive = true;
             colour = "Red";
             Serial1.println("Only collecting red items.");
   }
   else if (receivedChar == 'y') {
+            systemActive = true;
             colour_sort = true;
             colour = "Yellow";
             Serial1.println("Only collecting yellow items.");
   }
   else if (receivedChar == 'w') {
+            systemActive = true;
             colour_sort = true;
             colour = "White";
             Serial1.println("Only collecting White items.");
   }
   else if (receivedChar == 'k') {
+            systemActive = true;
             colour_sort = true;
             colour = "Black";
             Serial1.println("Only collecting black items.");
@@ -165,7 +177,7 @@ if (Serial1.available()) {
   else if (receivedChar == '3') {
             Stop();
             delay(500);
-            Serial1.println("Robot stopped. Beginning full reset.");
+            Serial1.println("Robot stopped. Beginning variable reset.");
             distance = 999;
             delayTime = 0; 
             counter = 0;
@@ -173,10 +185,16 @@ if (Serial1.available()) {
             colour = "None";
             detectedColour = "Unknown"; 
             boxColour = "Unknown"; 
-            colour = "None";
             itemPickedUp = false;
-            Serial1.println("Full reset done.");
-            setup();
+            Serial1.println("Reset variables done.");
+            systemActive = false;
+            tone(buzzer, 1000);
+            delay(1000);
+            noTone(buzzer);
+            delay(500);
+            Serial1.println("HC-05 Bluetooth Module Ready.");
+            Serial1.println("Send '1' to start.");
+            return;
   }
 }
 if (systemActive == true){
@@ -202,11 +220,11 @@ if((digitalRead(R_S) == 0)&&(digitalRead(L_S) == 0)){
  
 //if Right Sensor is Black and Left Sensor is White then it will call turn Right function
 else if((digitalRead(R_S) == 1)&&(digitalRead(L_S) == 0)){
-  right();}  
+  F_right();}  
 
 //if Right Sensor is White and Left Sensor is Black then it will call turn Left function
 else if((digitalRead(R_S) == 0)&&(digitalRead(L_S) == 1)){
-  left();} 
+  F_left();} 
 
 //If black is detected by both sensors, robot will intiate pick-up mechanism
 else if((digitalRead(R_S) == 1)&&(digitalRead(L_S) == 1)){
@@ -224,10 +242,20 @@ else if ((itemPickedUp == true)&&(detectedColour == boxColour)){
   Serial1.println("Drop-off point detected.");
   Drop_off();
 }
-else{
+else if ((itemPickedUp == true)&&(detectedColour == "Green")){
+  Serial1.println("Dropping off. Ignoring pick-up.");
   forward();
   delay(400);
-  Serial1.println("Wrong pick-up/drop-off point. Resuming...");
+}
+else if ((itemPickedUp == true)&&(detectedColour != boxColour)){
+  Serial1.println("Wrong drop-off point. Resuming...");
+  forward();
+  delay(400);
+}
+else{
+  Serial1.println("Not pick-up point. Resuming...");
+  forward();
+  delay(400);
 }}
 delay(10);
 }
@@ -255,38 +283,66 @@ void compareDistance(){
     if(distance_L > 20 && distance_L > distance_R){
     Serial1.println("Rerouting through left.");
     left();
-    delay(825);
+    delay(600);
+    Stop();
+    delay(500);
     forward();
     delay(900);
+    Stop();
+    delay(500);
     right();
-    delay(1000);
+    delay(700);
+    Stop();
+    delay(500);
     forward();
-    delay(1200);
+    delay(1800);
+    Stop();
+    delay(500);
     right();
-    delay(1000);
+    delay(700);
+    Stop();
+    delay(500);
     forward();
     delay(900);
+    Stop();
+    delay(500);
     left();
-    delay(825);
+    delay(600);
+    Stop();
+    delay(500);
     Serial1.println("Reroute complete");
     }
   
    else if(distance_R > 20 && distance_R > distance_L){
     Serial1.println("Rerouting through right.");
     right();
-    delay(1000);
+    delay(700);
+    Stop();
+    delay(500);
     forward();
     delay(900);
+    Stop();
+    delay(500);
     left();
-    delay(825);
+    delay(600);
+    Stop();
+    delay(500);
     forward();
-    delay(1200);
+    delay(1800);
+    Stop();
+    delay(500);
     left();
-    delay(825);
+    delay(600);
+    Stop();
+    delay(500);
     forward();
     delay(900);
+    Stop();
+    delay(500);
     right();
-    delay(1000);
+    delay(700);
+    Stop();
+    delay(500);
     Serial1.println("Reroute complete");
   }
 
@@ -338,9 +394,9 @@ void Pick_up(){
   }
   tof_read_R();
   if (counter == 5) {
-    Serial1.println("All pick-up points empty. Stopping operation.");
     Stop();
     delay(500);
+    Serial1.println("All pick-up points empty. Stopping operation.");
     systemActive = false;
     return;
   }
@@ -353,27 +409,26 @@ void Drop_off(){
   delay(500);
   Serial1.println("Dropping off item.");
   right();
-  delay(1000);
+  delay(700);
   Stop();
   delay(200);
   backward();
-  delay(1000);
+  delay(700);
   Stop();
   delay(100);
-  ServoLift.write(180);    // Moves forklift up
-  delay(4000);
+  //ServoLift.write(180);    // Moves forklift up
+  //delay(4000);
   ServoLift.write(0);    // Moves forklift down
-  delay(4000);         // Run for 8 seconds
+  delay(8000);         // Run for 8 seconds
   ServoLift.write(90);
   itemPickedUp = false;
-  Serial1.println(itemPickedUp); // Mark item as picked up
   Serial1.println("Drop-off complete.");
   forward();
-  delay(delayTime);
+  delay(700);
   Stop();
   delay(200);
   left();
-  delay(750);
+  delay(600);
 }
 
 //Colour Check Mechanism (Function to detect color and store it in a variable)
@@ -393,13 +448,13 @@ String Colour_check1() {
 
     if (red >= 120 && green <= 80 && blue <= 75) {
         return "Red";
-    } else if (red <= 90 && green >= 115 && blue <= 90) {
+    } else if (red <= 90 && green >= 110 && blue <= 90) {
         return "Green";
     } else if (red <= 70 && green <= 110 && blue >= 110) {
         return "Blue";
     } else if (red >= 100 && green >= 90 && blue <= 80) {
         return "Yellow";
-    } else if (red >= 100 && green >= 100 && blue >= 100) {
+    } else if (red >= 130 && green >= 90 && blue >= 130) {
         return "White"; 
     } else if (red >= 80 && red <= 120 && green >= 80 && green <= 120 && blue >= 80 && blue <= 120) {
         return "Black";
@@ -422,16 +477,16 @@ String Colour_check2() {
     Serial1.print((int)green); Serial1.print(", ");
     Serial1.print((int)blue); Serial1.println();
 
-    if (red >= 100 && green <= 80 && blue <= 80) {
+    if (red >= 140 && green <= 70 && blue <= 80) {
         return "Red";
     } else if (red <= 90 && green <= 115 && blue >= 80) {
         return "Blue";
-    } else if (red >= 90 && red <= 110 && green <= 100 && blue <= 70) {
-        return "White";
-    } else if (red >= 111 && red <= 120 && green <= 100 && blue <= 70) {
-        return "Black";
-    } else if (red >= 100 && green >= 80 && blue <= 80) {
+    } else if (red >= 120 && green >= 70 && blue <= 50) {
         return "Yellow";
+    } else if (red >= 90 && red <= 103 && green <= 100 && blue <= 80) {
+        return "White";
+    } else if (red >= 104 && red <= 117 && green <= 100 && blue <= 80) {
+        return "Black";
     } else {
         return "Unknown"; // Default case
     }
@@ -449,8 +504,8 @@ void forward() {
 
 
 void left() {
-  analogWrite(enA, 100);
-  analogWrite(enB, 100);
+  analogWrite(enA, 120);
+  analogWrite(enB, 120);
   digitalWrite(in1, HIGH);
   digitalWrite(in2, LOW);
   digitalWrite(in3, HIGH);
@@ -458,8 +513,8 @@ void left() {
 }
 
 void right() {
-  analogWrite(enA, 100);
-  analogWrite(enB, 100);
+  analogWrite(enA, 120);
+  analogWrite(enB, 120);
   digitalWrite(in1, LOW);
   digitalWrite(in2, HIGH);
   digitalWrite(in3, LOW);
@@ -476,8 +531,8 @@ void backward() {
 }
 
 void F_left() {
-  analogWrite(enA, 20);
-  analogWrite(enB, 80);
+  analogWrite(enA, 90);
+  analogWrite(enB, 90);
   digitalWrite(in1, HIGH);
   digitalWrite(in2, LOW);
   digitalWrite(in3, HIGH);
@@ -485,8 +540,8 @@ void F_left() {
 }
 
 void F_right() {
-  analogWrite(enA, 80);
-  analogWrite(enB, 20);
+  analogWrite(enA, 90);
+  analogWrite(enB, 90);
   digitalWrite(in1, LOW);
   digitalWrite(in2, HIGH);
   digitalWrite(in3, LOW);
@@ -523,7 +578,7 @@ void tof_read_L(){
   else{
     distance = constrain(vl6180x.readRange(), 50, 200);
     // Map distance to delay time (50mm → 2000ms, 200mm → 200ms)
-    delayTime = map(distance, 100, 200, 720, 800);
+    delayTime = map(distance, 100, 200, 700, 900);
 
     // Print values for debugging
     Serial1.print("Left Distance: ");
@@ -533,7 +588,7 @@ void tof_read_L(){
     Serial1.println(" ms");
     Serial1.println("Item on left. Initiating pick-up.");
     right();
-    delay(1000);
+    delay(700);
     Stop();
     delay(200);
     backward();
@@ -546,9 +601,9 @@ void tof_read_L(){
     if ((colour_sort == true)&&(colour == boxColour)){
       Serial1.println("Start Pick-Up.");
       ServoLift.write(180);    // Moves forklift up
-      delay(4000);
-      ServoLift.write(0);    // Moves forklift down
-      delay(4000);         // Run for 8 seconds
+      delay(10000);
+      //ServoLift.write(0);    // Moves forklift down
+      //delay(4000);         // Run for 8 seconds
       ServoLift.write(90);
       itemPickedUp = true; // Mark item as picked up
       Serial1.println("Item picked up.");
@@ -559,21 +614,21 @@ void tof_read_L(){
     if (colour_sort == false){
       Serial1.println("Start Pick-Up.");
       ServoLift.write(180);    // Moves forklift up
-      delay(4000);
-      ServoLift.write(0);    // Moves forklift down
-      delay(4000);         // Run for 8 seconds
+      delay(10000);
+      //ServoLift.write(0);    // Moves forklift down
+      //delay(4000);         // Run for 8 seconds
       ServoLift.write(90);
       itemPickedUp = true; // Mark item as picked up
       Serial1.println("Item picked up.");
     }
     forward();
-    delay(delayTime);
+    delay(delayTime-50);
     Stop();
     delay(200);
     left();
-    delay(800);
+    delay(600);
     forward();
-    delay(200);
+    delay(100);
     return;
 }}
 
@@ -593,7 +648,7 @@ void tof_read_R(){
     distance = constrain(vl6180x.readRange(), 50, 200);
   
     // Map distance to delay time (50mm → 2000ms, 200mm → 200ms)
-    delayTime = map(distance, 100, 200, 720, 800);
+    delayTime = map(distance, 100, 200, 700, 900);
 
     // Print values for debugging
     Serial1.print("Right Distance: ");
@@ -603,7 +658,7 @@ void tof_read_R(){
     Serial1.println(" ms");
     Serial1.println("Item on right. Initiating pick-up.");
     left();
-    delay(825);
+    delay(600);
     Stop();
     delay(200); 
     backward();
@@ -617,9 +672,9 @@ void tof_read_R(){
       Serial1.println("Start Pick-Up.");
       delay(500);   
       ServoLift.write(180);    // Moves forklift up
-      delay(4000);
-      ServoLift.write(0);  // Moves forklift down
-      delay(4000);         // Run for 8 seconds
+      delay(10000);
+      //ServoLift.write(0);  // Moves forklift down
+      //delay(4000);         // Run for 8 seconds
       ServoLift.write(90);
       itemPickedUp = true; // Mark item as picked up
       Serial1.println("Item picked up.");
@@ -630,20 +685,20 @@ void tof_read_R(){
     if (colour_sort == false){
       Serial1.println("Start Pick-Up.");
       ServoLift.write(180);    // Moves forklift up
-      delay(4000);
-      ServoLift.write(0);    // Moves forklift down
-      delay(4000);         // Run for 8 seconds
+      delay(10000);
+      //ServoLift.write(0);    // Moves forklift down
+      //delay(4000);         // Run for 8 seconds
       ServoLift.write(90);
       itemPickedUp = true; // Mark item as picked up
       Serial1.println("Item picked up.");
     }
     forward();
-    delay(delayTime);
+    delay(delayTime-100);
     Stop();
     delay(200);
     right();
-    delay(1000);
+    delay(700);
     forward();
-    delay(200);
+    delay(100);
   }
 }
