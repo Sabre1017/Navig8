@@ -464,28 +464,28 @@ String Colour_check1() {
 }
 
 String Colour_check2() {
-    int r, g, b, c;
-    uint8_t red, green, blue;
+    uint16_t r, g, b, c;
+    float red, green, blue;
 
     // Read data from Sensor 1 (Channel 0)
     tcaSelect(2);
     tcs.getRawData(&r, &g, &b, &c);
-    normalizeRGB(r, g, b, c, &red, &green, &blue);
+    normalizeRGB_ratio(r, g, b, &red, &green, &blue);
 
     Serial1.print("Normalized RGB: ");
-    Serial1.print((int)red); Serial1.print(", ");
-    Serial1.print((int)green); Serial1.print(", ");
-    Serial1.print((int)blue); Serial1.println();
+    Serial1.print(red, 4); Serial1.print(", ");
+    Serial1.print(green, 4); Serial1.print(", ");
+    Serial1.print(blue, 4); Serial1.println();
 
-    if (red >= 140 && green <= 70 && blue <= 80) {
+    if (red >= 0.5 && red <= 0.65 && green <= 0.25 && blue <= 0.24) {
         return "Red";
-    } else if (red <= 90 && green <= 115 && blue >= 80) {
+    } else if (red <= 0.27 && green <= 0.39 && blue >= 0.35) {
         return "Blue";
-    } else if (red >= 120 && green >= 70 && blue <= 50) {
+    } else if (red >= 0.43 && red <= 0.49 && green <= 0.35 && blue <= 0.22) {
         return "Yellow";
-    } else if (red >= 90 && red <= 103 && green <= 100 && blue <= 80) {
+    } else if (red >= 0.29 && red <= 0.33 && green >= 0.35 && blue >= 0.31) {
         return "White";
-    } else if (red >= 104 && red <= 117 && green <= 100 && blue <= 80) {
+    } else if (red >= 0.35 && red <= 0.37 && green <= 0.35 && blue <= 0.31) {
         return "Black";
     } else {
         return "Unknown"; // Default case
@@ -564,6 +564,17 @@ void normalizeRGB(float r, float g, float b, float c, uint8_t* red, uint8_t* gre
         *red = (uint8_t)(r / c * 255);
         *green = (uint8_t)(g / c * 255);
         *blue = (uint8_t)(b / c * 255);
+    }
+}
+
+void normalizeRGB_ratio(uint16_t r, uint16_t g, uint16_t b, float *red, float *green, float *blue) {
+    uint16_t sum = r + g + b;
+    if (sum > 0) {
+        *red = (float)r / sum;
+        *green = (float)g / sum;
+        *blue = (float)b / sum;
+    } else {
+        *red = *green = *blue = 0.0;
     }
 }
 
