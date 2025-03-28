@@ -15,7 +15,7 @@
 #define trigger A4 //Trigger pin
 #define servo A5
 bool systemActive = false; // Variable to track system state
-bool colour_sort = false; // Variable to track whether colour command activated
+bool colour_select = false; // Variable to track whether colour command activated
 String robotStatus = "Idle";
 Servo ServoLift;  // Create a servo object
 int buzzer = 9;
@@ -142,7 +142,7 @@ if (Serial1.available()) {
         }
   else if (receivedChar == 'b') {
             systemActive = true;
-            colour_sort = true;
+            colour_select = true;
             colour = "Blue";
             Serial1.println("Only collecting blue items.");
   }
@@ -153,24 +153,24 @@ if (Serial1.available()) {
   }
   else if (receivedChar == 'y') {
             systemActive = true;
-            colour_sort = true;
+            colour_select = true;
             colour = "Yellow";
             Serial1.println("Only collecting yellow items.");
   }
   else if (receivedChar == 'w') {
             systemActive = true;
-            colour_sort = true;
+            colour_select = true;
             colour = "White";
             Serial1.println("Only collecting White items.");
   }
   else if (receivedChar == 'k') {
             systemActive = true;
-            colour_sort = true;
+            colour_select = true;
             colour = "Black";
             Serial1.println("Only collecting black items.");
   }
   else if (receivedChar == '2') {
-            colour_sort = false;
+            colour_select = false;
             colour = "None";
             Serial1.println("Reset for specified colour collection.");
   }
@@ -181,7 +181,7 @@ if (Serial1.available()) {
             distance = 999;
             delayTime = 0; 
             counter = 0;
-            colour_sort = false;
+            colour_select = false;
             colour = "None";
             detectedColour = "Unknown"; 
             boxColour = "Unknown"; 
@@ -609,7 +609,7 @@ void tof_read_L(){
     boxColour = Colour_check2();
     Serial1.print("Box Colour: ");
     Serial1.println(boxColour);
-    if ((colour_sort == true)&&(colour == boxColour)){
+    if ((colour_select == true)&&(colour == boxColour)){
       Serial1.println("Start Pick-Up.");
       ServoLift.write(180);    // Moves forklift up
       delay(10000);
@@ -622,7 +622,7 @@ void tof_read_L(){
     else {
       Serial1.println("Wrong item colour. Resuming...");
     }
-    if (colour_sort == false){
+    if (colour_select == false){
       Serial1.println("Start Pick-Up.");
       ServoLift.write(180);    // Moves forklift up
       delay(10000);
@@ -679,7 +679,7 @@ void tof_read_R(){
     boxColour = Colour_check2();
     Serial1.print("Box Colour: ");
     Serial1.println(boxColour);
-    if ((colour_sort == true)&&(colour == boxColour)){
+    if ((colour_select == true)&&(colour == boxColour)){
       Serial1.println("Start Pick-Up.");
       delay(500);   
       ServoLift.write(180);    // Moves forklift up
@@ -693,7 +693,7 @@ void tof_read_R(){
     else {
       Serial1.println("Wrong item colour. Resuming...");
     }
-    if (colour_sort == false){
+    if (colour_select == false){
       Serial1.println("Start Pick-Up.");
       ServoLift.write(180);    // Moves forklift up
       delay(10000);
