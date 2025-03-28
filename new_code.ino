@@ -494,8 +494,8 @@ String Colour_check2() {
 
 
 void forward() {
-  analogWrite(enA, 60);
-  analogWrite(enB, 60);
+  analogWrite(enA, 65);
+  analogWrite(enB, 65);
   digitalWrite(in1, LOW);
   digitalWrite(in2, HIGH);
   digitalWrite(in3, HIGH);
